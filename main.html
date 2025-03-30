@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Užduočių planavimo programa</title>
+    <style>
+        body {font-family: Arial, sans-serif; text-align: center;}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Užduočių sąrašas</h1>
+        <input type="text" id="taskInput" placeholder="Įveskite užduotį">
+        <button onclick="addTask()">Pridėti</button>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", loadTasks);
+
+        function addTask(){
+            let input = document.getElementById("taskInput");
+            let taskText = input.value.trim();
+            if (taskText === "") return;
+
+            let li = createTaskElement(taskText);
+            document.getElementById("taskList").appendChild(li);
+
+            saveTasks();
+            input.value = "";
+
+        }
+
+        function createTaskElement(taskText, completed = false){
+            let li = document.createElement("li");
+            let span = document.createElement("span");
+            span.textContent = taskText;
+            if (completed){
+                span.style.textDecoration = "line-through";
+            }
+            let doneButton = document.createElement("button");
+            doneButton.textContent = "✔";
+            doneButton.onclick = function(){
+                span.style.textDecoration = span.style.textDecoration === "line-through" ? "none" : "line-through";
+                saveTasks();
+            };
+
+            let deleteButton = document.createElement("button");
+            deleteButton.textContent = "🗑";
+            deleteButton.onclick = function() {
+                li.remove();
+                saveTasks();
+            };
+
+            li.appendChild(span);
+            li.appendChild(doneButton);
+            li.appendChild(deleteButton);
+            return li;
+            
+
+        }
+
+        function saveTasks(){
+            let tasks = [];
+            document.querySelectorAll("#taskList li").forEach(li => {
+                let text = li.querySelector("span").style.textDecoration === "line-through";
+                tasks.push({ text, completed});
+            });
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+        }
+
+        function loadTasks(){
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            let taskList = document.getElementById("taskList");
+            tasks.forEach(task => {
+                let li = createTaskElement(task.text, task.completed);
+                taskList.appendChild(li);
+            });
+        }
+        </script>
+
+</body>
+</html>
